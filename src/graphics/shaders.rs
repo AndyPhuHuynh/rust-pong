@@ -60,3 +60,33 @@ pub fn get_uniform_location(program: u32, name: &str) -> Result<u32, String> {
         Ok(location as u32)
     }
 }
+
+pub fn generate_and_bind_vbo(vertices: &[f32]) -> u32 {
+    unsafe {
+        let mut vbo = 0;
+        gl::GenBuffers(1, &mut vbo);
+        gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+        gl::BufferData(
+            gl::ARRAY_BUFFER,
+            (std::mem::size_of::<f32>() * vertices.len()) as isize,
+            vertices.as_ptr() as *const _,
+            gl::STATIC_DRAW
+        );
+        vbo
+    }
+}
+
+pub fn generate_and_bind_ebo(indices: &[u32]) -> u32 {
+    unsafe {
+        let mut ebo = 0;
+        gl::GenBuffers(1, &mut ebo);
+        gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ebo);
+        gl::BufferData(
+            gl::ELEMENT_ARRAY_BUFFER,
+            (std::mem::size_of::<u32>() * indices.len()) as isize,
+            indices.as_ptr() as * const _,
+            gl::STATIC_DRAW
+        );
+        ebo
+    }
+}

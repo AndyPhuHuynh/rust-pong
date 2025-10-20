@@ -23,8 +23,6 @@ use winit::{
     window::{Window, WindowId}
 };
 
-use crate::graphics::traits::Draw;
-
 #[derive(Default)]
 struct App {
     window: Option<Window>,
@@ -33,7 +31,9 @@ struct App {
     context: Option<PossiblyCurrentContext>,
 
     keys_pressed: HashSet<KeyCode>,
-    player: Option<game::player::Player>
+    player: Option<game::player::Player>,
+    enemy: Option<game::enemy::Enemy>,
+    ball: Option<game::ball::Ball>
 }
 
 impl App {
@@ -86,6 +86,8 @@ impl ApplicationHandler for App {
         });
 
         self.player = Some(game::player::bind_player());
+        self.enemy = Some(game::enemy::bind_enemy());
+        self.ball = Some(game::ball::bind_ball());
         self.window = Some(window);
         self.display = Some(display);
         self.surface = Some(surface);
@@ -115,8 +117,8 @@ impl ApplicationHandler for App {
         window_id: WindowId,
         event: WindowEvent,
     ) {
-        let (Some(window), Some(surface), Some(context), Some(player)) 
-            = (self.window.as_ref(), self.surface.as_ref(), self.context.as_ref(), self.player.as_mut())
+        let (Some(window), Some(surface), Some(context), Some(player), Some(enemy), Some(ball)) 
+            = (self.window.as_ref(), self.surface.as_ref(), self.context.as_ref(), self.player.as_mut(), self.enemy.as_ref(), self.ball.as_mut())
         else { return; };
 
         if window.id() != window_id { return; }
@@ -126,10 +128,12 @@ impl ApplicationHandler for App {
             WindowEvent::RedrawRequested => {
                 unsafe {
                     gl::Clear(gl::COLOR_BUFFER_BIT);
-                    gl::UseProgram(player.program);
 
                     player.update(&self.keys_pressed);
                     player.draw();
+                    enemy.draw();
+                    ball.update(&player.shape);
+                    ball.draw();
 
                     gl::UseProgram(0);
                 }
