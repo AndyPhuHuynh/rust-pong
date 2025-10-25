@@ -83,6 +83,10 @@ impl Shape {
         self.center_y() - self.half_height
     }
 
+    pub fn set_center_x(&mut self, x: f32) {
+        self.offset.0 = x - self.start_location.0;
+    }
+
     pub fn draw(&self) {
         unsafe {
             gl::UseProgram(self.program);
